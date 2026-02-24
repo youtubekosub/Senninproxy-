@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SenninProxy</title>
+    <style>
+        body { background: #0f172a; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        h1 { font-size: 3rem; margin-bottom: 20px; color: #38bdf8; }
+        input { padding: 15px; width: 300px; border-radius: 8px; border: none; outline: none; font-size: 1rem; }
+        button { padding: 15px 25px; margin-left: 10px; border-radius: 8px; border: none; background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; }
+        button:hover { background: #0ea5e9; }
+    </style>
+</head>
+<body>
+    <h1>SenninProxy</h1>
+    <div>
+        <input id="url" type="text" placeholder="https://google.com">
+        <button id="go">Go</button>
+    </div>
+
+    <script src="/uv/uv.bundle.js"></script>
+    <script src="/uv/uv.config.js"></script>
+    <script>
+        const btn = document.getElementById('go');
+        btn.onclick = async () => {
+            const url = document.getElementById('url').value;
+            if (!url) return;
+
+            // Service Workerを登録してリダイレクト
+            await navigator.serviceWorker.register('/uv.sw.js', {
+                scope: __uv$config.prefix
+            });
+
+            let target = url.includes('://') ? url : 'https://' + url;
+            location.href = __uv$config.prefix + __uv$config.encodeUrl(target);
+        };
+    </script>
+</body>
+</html>
