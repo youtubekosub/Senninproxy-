@@ -5,36 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SenninProxy</title>
     <style>
-        body { background: #0f172a; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        h1 { font-size: 3rem; margin-bottom: 20px; color: #38bdf8; }
-        input { padding: 15px; width: 300px; border-radius: 8px; border: none; outline: none; font-size: 1rem; }
-        button { padding: 15px 25px; margin-left: 10px; border-radius: 8px; border: none; background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; }
-        button:hover { background: #0ea5e9; }
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #1a1a1a; color: white; }
+        h1 { color: #00ffcc; }
+        .search-box { display: flex; gap: 10px; width: 80%; max-width: 600px; }
+        input { flex: 1; padding: 12px; border-radius: 5px; border: none; outline: none; }
+        button { padding: 12px 24px; background: #00ffcc; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #00cca3; }
     </style>
 </head>
 <body>
     <h1>SenninProxy</h1>
-    <div>
-        <input id="url" type="text" placeholder="https://google.com">
+    <div class="search-box">
+        <input type="text" id="url" placeholder="URLを入力、または検索語句を入力">
         <button id="go">Go</button>
     </div>
 
-    <script src="/uv/uv.bundle.js"></script>
-    <script src="/uv/uv.config.js"></script>
+    <script src="uv/uv.bundle.js"></script>
+    <script src="uv/uv.config.js"></script>
     <script>
+        const input = document.getElementById('url');
         const btn = document.getElementById('go');
-        btn.onclick = async () => {
-            const url = document.getElementById('url').value;
-            if (!url) return;
 
-            // Service Workerを登録してリダイレクト
-            await navigator.serviceWorker.register('/uv.sw.js', {
+        // Service Workerの自動登録
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./uv/uv.sw.js', {
                 scope: __uv$config.prefix
             });
+        }
 
-            let target = url.includes('://') ? url : 'https://' + url;
-            location.href = __uv$config.prefix + __uv$config.encodeUrl(target);
+        btn.onclick = async () => {
+            let val = input.value.trim();
+            if (!val) return;
+
+            // URL判定 (簡易)
+            let targetUrl = "";
+            if (val.includes('.') && !val.includes(' ')) {
+                targetUrl = val.startsWith('http') ? val : 'https://' + val;
+            } else {
+                // API経由で検索
+                const res = await fetch(`/api/search?q=${encodeURIComponent(val)}`);
+                const data = await res.json();
+                targetUrl = data.url;
+            }
+
+            // プロキシ経由で移動
+            location.href = __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
         };
+
+        // Enterキー対応
+        input.onkeydown = (e) => { if (e.key === 'Enter') btn.click(); };
     </script>
 </body>
 </html>
