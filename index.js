@@ -23,9 +23,7 @@ app.get("/api/search", async (req, res) => {
 
   const engines = [
     "https://duckduckgo.com/?q=%s",
-    "https://www.startpage.com/sp/search?q=%s",
     "https://search.brave.com/search?q=%s",
-    "https://duckduckgo.com/html/?q=%s",
     "https://lite.duckduckgo.com/lite/?q=%s"
   ];
 
@@ -46,14 +44,12 @@ app.get("/api/search", async (req, res) => {
       clearTimeout(timer);
       if (r.ok) return res.json({ url });
     } catch (e) {
-      // 失敗時はログを出して次へ
       console.log(`[SenninProxy] Engine failed: ${url}`);
     }
   }
   return res.status(502).json({ error: "no search engine available" });
 });
 
-// Routing Logic
 server.on('request', (req, res) => {
   if (bareServer.shouldRoute(req)) {
     bareServer.routeRequest(req, res);
@@ -75,12 +71,10 @@ server.listen(PORT, () => {
 });
 
 function shutdown() {
-  console.log("\nSenninProxy shutting down...");
   server.close(() => {
     bareServer.close();
     process.exit(0);
   });
 }
-
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
