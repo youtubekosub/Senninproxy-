@@ -1,0 +1,20 @@
+{
+  "$schema": "https://codesandbox.io/schemas/tasks.json",
+  "setupTasks": [
+    {
+      "name": "Install dependencies",
+      "run": "npm install"
+    }
+  ],
+  "tasks": {
+    "start": {
+      "name": "SenninProxy Start",
+      "command": "npm start",
+      "runAtStart": true,
+      "preview": {
+        "port": 8080,
+        "strategy": "reopen"
+      }
+    }
+  }
+}
