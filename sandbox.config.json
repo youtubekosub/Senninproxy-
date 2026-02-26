@@ -4,5 +4,8 @@
   "view": "browser",
   "container": {
     "nodeVersion": "18"
-  }
+  },
+  "proxyEnabled": true,
+  "startRoute": "/",
+  "port": 8080
 }
