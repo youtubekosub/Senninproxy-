@@ -13,7 +13,8 @@
       "runAtStart": true,
       "preview": {
         "port": 8080,
-        "strategy": "reopen"
+        "strategy": "reopen",
+        "primary": true
       }
     }
   }
