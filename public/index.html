@@ -5,55 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SenninProxy</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #1a1a1a; color: white; }
-        h1 { color: #00ffcc; }
-        .search-box { display: flex; gap: 10px; width: 80%; max-width: 600px; }
-        input { flex: 1; padding: 12px; border-radius: 5px; border: none; outline: none; }
-        button { padding: 12px 24px; background: #00ffcc; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #00cca3; }
+        body { font-family: sans-serif; background: #0b0b0b; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .container { text-align: center; width: 90%; max-width: 500px; }
+        h1 { font-size: 3rem; color: #00ffcc; text-shadow: 0 0 10px #00ffcc; }
+        input { width: 100%; padding: 15px; border-radius: 30px; border: 2px solid #00ffcc; background: transparent; color: white; font-size: 1rem; margin-bottom: 20px; box-sizing: border-box; outline: none; }
+        button { padding: 10px 30px; border-radius: 20px; border: none; background: #00ffcc; color: #000; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { transform: scale(1.1); box-shadow: 0 0 15px #00ffcc; }
     </style>
 </head>
 <body>
-    <h1>SenninProxy</h1>
-    <div class="search-box">
-        <input type="text" id="url" placeholder="URLを入力、または検索語句を入力">
-        <button id="go">Go</button>
+    <div class="container">
+        <h1>SenninProxy</h1>
+        <input type="text" id="address" placeholder="URLまたは検索ワードを入力...">
+        <button id="launch">起動</button>
     </div>
 
-    <script src="uv/uv.bundle.js"></script>
+    <script src="https://taco-organized.github.io/uv/uv.bundle.js"></script>
+    <script src="https://taco-organized.github.io/uv/uv.client.js"></script>
     <script src="uv/uv.config.js"></script>
-    <script>
-        const input = document.getElementById('url');
-        const btn = document.getElementById('go');
 
-        // Service Workerの自動登録
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./uv/uv.sw.js', {
-                scope: __uv$config.prefix
-            });
-        }
+    <script>
+        const input = document.getElementById('address');
+        const btn = document.getElementById('launch');
+
+        // Service Workerの登録
+        (async () => {
+            if ('serviceWorker' in navigator) {
+                await navigator.serviceWorker.register('./uv/uv.sw.js', {
+                    scope: __uv$config.prefix
+                });
+            }
+        })();
 
         btn.onclick = async () => {
-            let val = input.value.trim();
-            if (!val) return;
+            let url = input.value.trim();
+            if (!url) return;
 
-            // URL判定 (簡易)
-            let targetUrl = "";
-            if (val.includes('.') && !val.includes(' ')) {
-                targetUrl = val.startsWith('http') ? val : 'https://' + val;
-            } else {
-                // API経由で検索
-                const res = await fetch(`/api/search?q=${encodeURIComponent(val)}`);
+            if (!url.includes('.') || url.includes(' ')) {
+                const res = await fetch(`/api/search?q=${encodeURIComponent(url)}`);
                 const data = await res.json();
-                targetUrl = data.url;
+                url = data.url;
+            } else if (!/^https?:\/\//.test(url)) {
+                url = 'https://' + url;
             }
 
-            // プロキシ経由で移動
-            location.href = __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
+            window.location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
         };
-
-        // Enterキー対応
-        input.onkeydown = (e) => { if (e.key === 'Enter') btn.click(); };
     </script>
 </body>
 </html>
