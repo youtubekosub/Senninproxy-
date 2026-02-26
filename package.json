@@ -2,11 +2,8 @@
   "name": "senninproxy",
   "version": "1.0.0",
   "type": "module",
-  "description": "SenninProxy - High performance web proxy",
-  "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node --watch index.js"
+    "start": "node index.js"
   },
   "dependencies": {
     "@tomphttp/bare-server-node": "^2.0.1",
